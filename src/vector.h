@@ -16,7 +16,7 @@ typedef struct vec2d {
 static const vec2d v2zero = {0.0, 0.0};
 
 static inline vec2d
-v2(const float x, const float y)
+v2(const double x, const double y)
 {
 	vec2d v = {x, y};
 	return v;

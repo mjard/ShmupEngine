@@ -35,6 +35,12 @@ list_node *
 list_insert(list *list, void *data) 
 {
 	list_node *node = malloc(sizeof(list_node));
+	
+	if (node == NULL) {
+		fprintf(stderr, "Failed to allocate node\n");
+		return NULL;
+	}
+	
 	node->data = data;
 	node->next = NULL;
 	node->prev = NULL;

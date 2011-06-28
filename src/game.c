@@ -49,12 +49,12 @@ void
 shmup_game_update(shmup_game *g, double t, double dt)
 {	
 	list_node *node = g->bullets->head;	
-	// glfwPollEvents();	
 	
 	if (g->bullets->size < MAX_BULLETS) {
 		bullet *b;
 		for (int i = 0; i < 10; i++) {
 			b = bullet_new(v2(400, 200), v2(0,0));
+			if (b == NULL) continue;		
 			bullet_explode(b);
 			list_insert(g->bullets, b);
 		}
@@ -63,10 +63,9 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	while (node != NULL) {
 		bullet *b = node->data;
 		if (b->alive) {
-			bullet_update(b, dt);
-			
+			bullet_update(b, dt);			
 			if (b->position.y < 0) {
-	//			list_remove(g->bullets, node);
+//				list_remove(g->bullets, node);
 				bullet_kill(b);
 				bullet_explode(b);
 			}

@@ -9,10 +9,13 @@ bullet *
 bullet_new(vec2d p, vec2d v) 
 {
 	bullet *b = malloc(sizeof(bullet));
+	if (b == NULL) {
+		fprintf(stderr, "Failed to allocate bullet\n");
+		return NULL;
+	}
 	b->position = p;
 	b->velocity = v;
-	b->alive = 1;	
-//	printf("v: %f, %f \n", b->velocity.x, b->velocity.y);
+	b->alive = 1;
 	return b;
 }
 
@@ -25,7 +28,7 @@ bullet_explode(bullet *b)
 	b->alive = 1;
 }
 
-inline void 
+void 
 bullet_update(bullet *b, float dt)
 {		
 	if (!b->alive) return;

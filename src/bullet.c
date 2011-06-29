@@ -20,9 +20,9 @@
 //}
 
 void
-bullet_init(bullet *b)
+bullet_init(bullet *b, vec2d p, vec2d v)
 {
-	b->pos = v2(400,300);
+	b->pos = p;
 	b->vel.x = ((float)rand()/RAND_MAX-0.5) * 400;
 	b->vel.y = ((float)rand()/RAND_MAX) * 400;
 	b->acc = v2zero;

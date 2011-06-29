@@ -13,10 +13,10 @@ shmup_game_init()
 	srand(100);	
 	g->quit = 0;
 	g->bullet_pool = pool_new(MAX_BULLETS, sizeof(bullet));
-	
+	g->emitter = v2(400,300);
 	bullet* b = g->bullet_pool->data;
 	for (i=0; i<g->bullet_pool->size; i++) {
-		bullet_init(&b[i]);
+		bullet_init(&b[i], g->emitter, v2zero);
 		b[i].acc = g->bullet_pool->gravity;
 	}
 
@@ -56,24 +56,23 @@ shmup_game_update(shmup_game *g, double t, double dt)
 {				
 
 	if (glfwGetKey(GLFW_KEY_UP)) {
-		
+		g->emitter.y += 10;
 	} else if (glfwGetKey(GLFW_KEY_DOWN)) {
-		
+		g->emitter.y -= 10;
 	}
 	
 	if (glfwGetKey(GLFW_KEY_LEFT)) {
-		
+		g->emitter.x -= 10;
 	} else if (glfwGetKey(GLFW_KEY_RIGHT)) {
-		
+		g->emitter.x += 10;
 	}
-	
-	
+		
 	int i;
 	bullet* b = g->bullet_pool->data;
 	for (i=0; i<g->bullet_pool->size; i++) {
 		bullet_update(&b[i], dt);
 		if (b[i].pos.y < 0) {
-			bullet_init(&b[i]);		
+			bullet_init(&b[i], g->emitter, v2zero);
 			b[i].acc = g->bullet_pool->gravity;	
 		}
 	}

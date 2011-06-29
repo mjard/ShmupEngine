@@ -53,7 +53,7 @@ void emitter_update(emitter *e);
 void emitter_emit(emitter *e);
 
 //bullet * bullet_new(vec2d p, vec2d v);
-void bullet_init(bullet *b);
+void bullet_init(bullet *b, vec2d p, vec2d v);
 void bullet_update(bullet *b, float dt);
 void bullet_kill(bullet *b);
 void bullet_destroy(bullet *b);

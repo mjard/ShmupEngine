@@ -19,6 +19,7 @@
 typedef struct shmup_game {
 	int quit;
 	pool *bullet_pool;
+	vec2d emitter
 } shmup_game;
 
 shmup_game * shmup_game_init();

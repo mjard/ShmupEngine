@@ -3,9 +3,20 @@ OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=shmup
 
 CC=gcc
-LIBS=-lm -lGL -lglfw
-CFLAGS=-c -std=c99
+LIBS=-lm -lglfw
 LDFLAGS=-g
+CFLAGS=-c -std=c99
+
+UNAME_S=$(shell uname)
+
+ifeq ($(UNAME_S), Linux)
+LIBS += -lGL
+endif
+
+ifeq ($(UNAME_S), Darwin)
+CC=clang
+LDFLAGS += -framework OpenGL -framework Cocoa
+endif
 
 all: $(SOURCES) $(EXECUTABLE)
 

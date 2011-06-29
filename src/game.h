@@ -11,8 +11,7 @@
 #include <GL/glfw.h>
 
 #include "bullet.h"
-#include "list.h"
-#include "entity.h"
+#include "pool.h"
 #include "vector.h"
 
 #define MAX_BULLETS 50000

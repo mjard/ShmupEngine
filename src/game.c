@@ -8,11 +8,18 @@
 shmup_game * 
 shmup_game_init() 
 {
-	
+	int i;
 	shmup_game *g = malloc(sizeof(shmup_game));
 	srand(100);	
 	g->quit = 0;
-	g->bullet_pool = pool_new(MAX_BULLETS);
+	g->bullet_pool = pool_new(MAX_BULLETS, sizeof(bullet));
+	
+	bullet* b = g->bullet_pool->data;
+	for (i=0; i<g->bullet_pool->size; i++) {
+		bullet_init(&b[i]);
+		b[i].acc = g->bullet_pool->gravity;
+	}
+
 	return g;
 }
 
@@ -47,7 +54,29 @@ shmup_game_run(shmup_game *g)
 void 
 shmup_game_update(shmup_game *g, double t, double dt)
 {				
-	pool_update(g->bullet_pool, dt);
+
+	if (glfwGetKey(GLFW_KEY_UP)) {
+		
+	} else if (glfwGetKey(GLFW_KEY_DOWN)) {
+		
+	}
+	
+	if (glfwGetKey(GLFW_KEY_LEFT)) {
+		
+	} else if (glfwGetKey(GLFW_KEY_RIGHT)) {
+		
+	}
+	
+	
+	int i;
+	bullet* b = g->bullet_pool->data;
+	for (i=0; i<g->bullet_pool->size; i++) {
+		bullet_update(&b[i], dt);
+		if (b[i].pos.y < 0) {
+			bullet_init(&b[i]);		
+			b[i].acc = g->bullet_pool->gravity;	
+		}
+	}
 }
 
 void shmup_game_draw(shmup_game *g) 
@@ -55,11 +84,16 @@ void shmup_game_draw(shmup_game *g)
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	// glTranslatef(b->position.x, b->position.y, 0);
+	// glTranslatef(b->pos.x, b->pos.y, 0);
 	glPointSize(2.0);
 	glBegin(GL_POINTS);
 	{
-		pool_draw(g->bullet_pool);
+		int i;
+		bullet* b = g->bullet_pool->data;
+		for (i=0; i < g->bullet_pool->size; i++) {			
+			glColor4f(b[i].rgba[0],b[i].rgba[1],b[i].rgba[2],1.0);
+			glVertex2f(b[i].pos.x, b[i].pos.y);
+		}
 	}
 	glEnd();
 	glfwSwapBuffers();

@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "game.h"
+#include "pool.h"
 #include "entity.h"
 #include "vector.h"
 
@@ -38,11 +39,12 @@ typedef struct emitter {
 } emitter;
 
 typedef struct bullet {
-	vec2d position;
-	vec2d velocity;
+	vec2d pos;
+	vec2d vel;
+	vec2d acc;
 	int alive;
 	int btype;
-	GLbyte rgba[4];
+	GLfloat rgba[4];
 } bullet;
 
 emitter * emitter_new();
@@ -50,9 +52,9 @@ void emitter_destroy(emitter *e);
 void emitter_update(emitter *e);
 void emitter_emit(emitter *e);
 
-bullet * bullet_new(vec2d p, vec2d v);
+//bullet * bullet_new(vec2d p, vec2d v);
+void bullet_init(bullet *b);
 void bullet_update(bullet *b, float dt);
-void bullet_explode(bullet *b);
 void bullet_kill(bullet *b);
 void bullet_destroy(bullet *b);
 

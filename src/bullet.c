@@ -5,35 +5,42 @@
 
 #include "bullet.h"
 
-bullet *
-bullet_new(vec2d p, vec2d v) 
-{
-	bullet *b = malloc(sizeof(bullet));
-	if (b == NULL) {
-		fprintf(stderr, "Failed to allocate bullet\n");
-		return NULL;
-	}
-	b->position = p;
-	b->velocity = v;
-	b->alive = 1;
-	return b;
-}
+//bullet *
+//bullet_new(vec2d p, vec2d v) 
+//{
+//	bullet *b = malloc(sizeof(bullet));
+//	if (b == NULL) {
+//		fprintf(stderr, "Failed to allocate bullet\n");
+//		return NULL;
+//	}
+//	b->pos = p;
+//	b->vel = v;
+//	b->alive = 1;
+//	return b;
+//}
 
 void
-bullet_explode(bullet *b)
+bullet_init(bullet *b)
 {
-	b->position = v2(400, 200);
-	b->velocity = v2((float)rand() / RAND_MAX-0.5,(float)rand() / RAND_MAX);
-	b->velocity = v2mul(v2normal(b->velocity), 200.0f);
+	b->pos = v2(400,300);
+	b->vel.x = ((float)rand()/RAND_MAX-0.5) * 400;
+	b->vel.y = ((float)rand()/RAND_MAX) * 400;
+	b->acc = v2zero;
 	b->alive = 1;
+	
+	float temp = (float)rand()/RAND_MAX * 0.5;
+	b->rgba[0] = temp;
+	b->rgba[1] = temp;
+	b->rgba[2] = 0.5 + (float)rand()/RAND_MAX * 0.5;
+	b->rgba[3] = 255;
 }
 
 void 
 bullet_update(bullet *b, float dt)
 {		
 	if (!b->alive) return;
-	b->position = v2add(b->position, v2mul(b->velocity, dt));
-	b->velocity = v2add(b->velocity, v2mul(v2(0, -150.0f), dt));
+	b->pos = v2add(b->pos, v2mul(b->vel, dt));
+	b->vel = v2add(b->vel, v2mul(b->acc, dt));
 }
 
 void

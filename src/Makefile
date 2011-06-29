@@ -1,4 +1,4 @@
-SOURCES=main.c bullet.c game.c list.c network.c player.c
+SOURCES=$(shell find . -type f -name "*.c")
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=shmup
 

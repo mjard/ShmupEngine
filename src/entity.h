@@ -6,7 +6,9 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <stdlib.h>
 #include "vector.h"
+#include "GL/glfw.h"
 
 enum COLLISION_SHAPE {
 	CIRCLE = 1,
@@ -28,8 +30,8 @@ typedef struct pool_entity {
 } pool_entity;
 
 typedef struct pool {
-	int total_entities;
-	int alive_entities;
+	int size;
+	int num_alive;
 	pool_entity *entity_list;
 	vec2d gravity;
 	int shape;
@@ -43,7 +45,7 @@ void entity_draw(entity *e);
 
 pool * pool_new(int size);
 void pool_destroy(pool *p);
-void pool_update(pool *p);
+void pool_update(pool *p, double dt);
 void pool_resize(pool *p, int size);
 void pool_draw(pool *p);
 

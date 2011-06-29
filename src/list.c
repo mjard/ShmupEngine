@@ -45,7 +45,7 @@ list_insert(list *list, void *data)
 	node->next = NULL;
 	node->prev = NULL;
 	
-	if (list->tail != NULL) {
+	if (list->size > 0) {
 		node->prev = list->tail;
 		list->tail->next = node;
 		list->tail = node;		

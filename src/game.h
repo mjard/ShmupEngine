@@ -10,15 +10,16 @@
 #include <stdio.h>
 #include <GL/glfw.h>
 
-#include "vector.h"
-#include "list.h"
 #include "bullet.h"
+#include "list.h"
+#include "entity.h"
+#include "vector.h"
 
-#define MAX_BULLETS 10000
+#define MAX_BULLETS 50000
 
 typedef struct shmup_game {
 	int quit;
-	list *bullets;
+	pool *bullet_pool;
 } shmup_game;
 
 shmup_game * shmup_game_init();

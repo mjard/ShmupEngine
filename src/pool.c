@@ -30,8 +30,8 @@ pool_resize(pool *p, int size, int entity_size, void (*init_func)(void *))
 {
 	if (size <= p->size) return p;
 	pool *new = pool_new(size, entity_size, init_func);
-	memcpy(new->vdata, p->vdata, sizeof(vertex) * size);
-	memcpy(new->data, p->data, entity_size * size);
+	memcpy(new->vdata, p->vdata, sizeof(vertex) * p->size);
+	memcpy(new->data, p->data, entity_size * p->size);
 	pool_destroy(p);
 	return new;
 }

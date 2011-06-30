@@ -11,7 +11,6 @@
 #include <GL/glfw.h>
 
 #include "bullet.h"
-#include "pool.h"
 #include "vector.h"
 
 #ifndef M_PI
@@ -22,7 +21,7 @@
 
 typedef struct shmup_game {
 	int quit;
-	pool *bpool;
+	bpool *bpool;
 	vec2d emitter;
 	vec2d gravity;
 } shmup_game;

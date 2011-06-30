@@ -8,9 +8,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "game.h"
-#include "pool.h"
 #include "entity.h"
 #include "vector.h"
 
@@ -24,44 +23,35 @@ enum B_TYPE {
 	B_LUA		// pos, vel, acc, checks with lua for instructions
 };
 
-typedef struct emitter {	
-	pool pool;
-	vec2d pos;
-	int btype;	
-	
-	float direction;	
-	float rate;
-	float lin_speed;	
-	float angular_speed;
-	
-	float direction_variance;
-	float rate_variance;	
-	float lin_speed_variance;
-	float angular_speed_variance;
-
-	GLuint tex_id;
-} emitter;
-
 typedef struct bullet {
 	vec2d pos;
 	vec2d vel;
 	vec2d acc;
-	
-	int alive;
-	int btype;
-	
-	vertex *vertex;
-	GLuint tex_id;
 } bullet;
 
-emitter * emitter_new();
-void emitter_destroy(emitter *e);
-void emitter_update(emitter *e);
-void emitter_emit(emitter *e);
+typedef struct vertex {
+	float x, y;
+	unsigned int color;
+	float padding[1];
+} vertex;
 
-void bullet_init(void *p);
-void bullet_emit(bullet *b, vec2d p, vec2d v);
-void bullet_update(bullet *b, float dt);
-void bullet_kill(bullet *b);
+typedef struct bpool {
+	int size;
+	int n_active;
+	bullet *bdata;
+	vertex *vdata;
+} bpool;
+
+
+
+void bullet_init(bullet *b, vertex *v);
+void bullet_emit(bullet *b, vertex *v, vec2d pos, vec2d vel, vec2d acc, unsigned int color);
+void bullet_update(bullet *b, vertex *v, float dt);
+
+bpool * bpool_new(int size);
+bpool * bpool_resize(bpool *bp, int size);
+void bpool_destroy(bpool *bp);
+int bpool_activate(bpool *bp);
+void bpool_deactivate(bpool *bp, int index);
 
 #endif

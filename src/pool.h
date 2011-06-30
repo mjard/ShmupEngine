@@ -11,10 +11,17 @@
 
 #include "vector.h"
 
+typedef struct vertex {
+	float x, y;
+	unsigned int color;
+	float padding[1];
+} vertex;
+
 typedef struct pool {
 	int size;
 	int num_alive;
 	void *data;
+	vertex *vdata;
 } pool;
 
 pool * pool_new(int size, int entity_size, void (*init_func)(void *));

@@ -14,7 +14,7 @@
 #include "pool.h"
 #include "vector.h"
 
-#define MAX_BULLETS 10
+#define MAX_BULLETS 200000
 
 typedef struct shmup_game {
 	int quit;

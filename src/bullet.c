@@ -14,15 +14,13 @@ bullet_init(void *p)
 	b->acc = v2(0,-150);
 	b->alive = 0;
 	b->btype = B_REG;
-	b->rgba[0] = 255;
-	b->rgba[1] = 255;
-	b->rgba[2] = 255;
-	b->rgba[3] = 255;	
 }
 
 void
 bullet_emit(bullet *b, vec2d p, vec2d v) {
 	b->pos = p;
+	b->vertex->x = b->pos.x;
+	b->vertex->y = b->pos.y;
 	double speed = (float)rand()/RAND_MAX * 400;
 	double angle = (float)rand()/RAND_MAX * M_PI * 2;
 	b->vel.x = sin(angle) * speed;
@@ -30,19 +28,22 @@ bullet_emit(bullet *b, vec2d p, vec2d v) {
 	b->acc = v2zero;
 	b->alive = 1;
 	
-	float colorbase = (float)rand()/RAND_MAX * 0.5;
-	b->rgba[0] = colorbase;
-	b->rgba[1] = colorbase;
-	b->rgba[2] = 0.5 + (float)rand()/RAND_MAX * 0.5;
-	b->rgba[3] = 1.0;
+	GLubyte colorbase = rand() % 128;
+	b->vertex->color = colorbase;
+	b->vertex->color += colorbase * 0x100;
+	b->vertex->color += (colorbase + rand() % (256-colorbase)) * 0x10000;
+	b->vertex->color += 0xFF000000;
+	
 }
 
 void 
 bullet_update(bullet *b, float dt)
 {		
 //	if (!b->alive) return;
-	b->pos = v2add(b->pos, v2mul(b->vel, dt));
-	b->vel = v2add(b->vel, v2mul(b->acc, dt));
+	b->pos = v2add(b->pos, v2mul(b->vel, dt));	
+	b->vel = v2add(b->vel, v2mul(b->acc, dt));	
+	b->vertex->x = b->pos.x;
+	b->vertex->y = b->pos.y;
 }
 
 void

@@ -13,10 +13,12 @@ shmup_game_init()
 	g->emitter = v2(400,300);
 	g->gravity = v2(0, -150);
 	
-	g->bpool = pool_new(MAX_BULLETS, sizeof(bullet), bullet_init);
+	g->bpool = pool_new(10, sizeof(bullet), bullet_init);
 	
 	bullet *b = g->bpool->data;
+	vertex *v = g->bpool->vdata;
 	for (int i=0; i<g->bpool->size; i++) {
+		b[i].vertex = &v[i];
 		bullet_emit(&b[i], g->emitter, v2zero);
 		b[i].acc = g->gravity;
 	}
@@ -28,9 +30,16 @@ void
 bullet_resize(shmup_game *g, int size)
 {
 	int old_size = g->bpool->size;
-	g->bpool = pool_resize(g->bpool, size, sizeof(bullet), bullet_init);		
+	g->bpool = pool_resize(g->bpool, size, sizeof(bullet), bullet_init);	
 	bullet *b = g->bpool->data;
+	vertex *v = g->bpool->vdata;
+	
+	for (int i=0; i<old_size-1; i++) {
+		b[i].vertex = &v[i];
+	}
+	
 	for (int i=old_size-1; i<g->bpool->size; i++) {
+		b[i].vertex = &v[i];
 		bullet_emit(&b[i], g->emitter, v2zero);
 		b[i].acc = g->gravity;
 	}
@@ -93,29 +102,20 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	if (t > 8 && g->bpool->size == 100) bullet_resize(g, 1000);
 	if (t > 12 && g->bpool->size == 1000) bullet_resize(g, 10000);
 	if (t > 16 && g->bpool->size == 10000) bullet_resize(g, 100000);
-	
+	if (t > 20 && g->bpool->size == 100000) bullet_resize(g, 200000);
 }
 
 void shmup_game_draw(shmup_game *g) 
-{   
-	
+{   	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	glPointSize(2.0);
-	glBegin(GL_POINTS);
-	{
-		bullet *b = g->bpool->data;
-		for (int i=0; i<g->bpool->size; i++) {
-			glColor4f(
-				  b[i].rgba[0],
-				  b[i].rgba[1],
-				  b[i].rgba[2],
-				  b[i].rgba[3]
-			);
-			glVertex2f(b[i].pos.x, b[i].pos.y);
-		}
-	}
-	glEnd();
+	glPointSize(2.0);	
+	vertex *v = g->bpool->vdata;
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(2, GL_FLOAT, sizeof(vertex), &v[0].x);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vertex), &v[0].color);
+	glDrawArrays(GL_POINTS, 0, g->bpool->size);
 	glfwSwapBuffers();
 }
 

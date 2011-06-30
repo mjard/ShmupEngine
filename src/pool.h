@@ -7,18 +7,19 @@
 #define POOL_H
 
 #include <stdlib.h>
+#include <string.h>
+
 #include "vector.h"
 
 typedef struct pool {
 	int size;
 	int num_alive;
-	vec2d gravity;
 	void *data;
 } pool;
 
-pool * pool_new(int size, int entity_size);
+pool * pool_new(int size, int entity_size, void (*init_func)(void *));
+pool * pool_resize(pool *p, int size, int entity_size, void (*init_func)(void *));
+void pool_do(pool *p, void (*func)(void *));
 void pool_destroy(pool *p);
-void * pool_get_data(pool *p);
-void pool_resize(pool *p, int size);
 
 #endif

@@ -14,12 +14,13 @@
 #include "pool.h"
 #include "vector.h"
 
-#define MAX_BULLETS 50000
+#define MAX_BULLETS 10
 
 typedef struct shmup_game {
 	int quit;
-	pool *bullet_pool;
-	vec2d emitter
+	pool *bpool;
+	vec2d emitter;
+	vec2d gravity;
 } shmup_game;
 
 shmup_game * shmup_game_init();

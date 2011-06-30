@@ -26,7 +26,7 @@ enum B_TYPE {
 
 typedef struct emitter {
 	pool pool;
-	entity entity;
+	vec2d pos;
 	int btype;
 	float direction;
 	float direction_variance;
@@ -52,10 +52,9 @@ void emitter_destroy(emitter *e);
 void emitter_update(emitter *e);
 void emitter_emit(emitter *e);
 
-//bullet * bullet_new(vec2d p, vec2d v);
-void bullet_init(bullet *b, vec2d p, vec2d v);
+void bullet_init(void *p);
+void bullet_emit(bullet *b, vec2d p, vec2d v);
 void bullet_update(bullet *b, float dt);
 void bullet_kill(bullet *b);
-void bullet_destroy(bullet *b);
 
 #endif

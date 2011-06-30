@@ -11,9 +11,8 @@ shmup_game_init()
 	shmup_game *g = malloc(sizeof(shmup_game));	
 	g->quit = 0;	
 	g->emitter = v2(400,300);
-	g->gravity = v2(0, -150);	
+	g->gravity = v2(0, -250);	
 	g->bpool = bpool_new(1000);
-
 	return g;
 }
 
@@ -21,7 +20,7 @@ void
 shmup_game_run(shmup_game *g) 
 {
 	double t = 0.0;
-	const double dt = 1.0f/100;
+	const double dt = 1.0f/60;
 	double currentTime = glfwGetTime();
 	double accumulator = 0.0;
 	
@@ -40,24 +39,25 @@ shmup_game_run(shmup_game *g)
 		}
 		
 		shmup_game_draw(g);
+
 		if (glfwGetKey(GLFW_KEY_ESC) || !glfwGetWindowParam(GLFW_OPENED)) 
 			g->quit = 1;
 	}
 }
 
 void
-fire(shmup_game *g, int num)
+fire(shmup_game *g, int num, int col)
 {
 	bullet *b;
 	vertex *v;
-	unsigned int i, index, color;
+	unsigned int i, index;
 	double angle, speed;
 	vec2d vel;
-	GLubyte colorbase;
 	
 	for (i=0; i<num; ++i) {
 		index = bpool_activate(g->bpool);
 		if (index == -1){
+			/* we need to resize the pool */
 			int new_size = g->bpool->size * 2;
 			fprintf(stderr, "resizing to %d!\n", new_size);
 			g->bpool = bpool_resize(g->bpool, new_size);
@@ -75,68 +75,78 @@ fire(shmup_game *g, int num)
 		angle = (float)rand()/RAND_MAX * M_PI ;
 		vel = v2(cos(angle)*speed, sin(angle)*speed);
 		
-		colorbase = rand() % 128;
-		color = colorbase;
-		color += colorbase * 0x100;
-		color += (colorbase + rand() % (256-colorbase)) * 0x10000;
-		color += 0xFF000000;	
-		    
-		bullet_emit(b, v, g->emitter, vel, g->gravity, color);		
+		if (col) {
+			unsigned char colorbase;
+			colorbase = rand() % 128;
+			v->color = colorbase;
+			v->color += colorbase * 0x100;
+			v->color += (colorbase + rand() % (256-colorbase)) * 0x10000;
+			v->color += 0xFF000000;	
+		} else {
+			unsigned char colorbase;
+			colorbase = rand() % 128;
+			v->color = (colorbase + rand() % (256-colorbase));
+			v->color += colorbase * 0x100;
+			v->color += colorbase * 0x10000;
+			v->color += 0xFF000000;
+		}
+		
+		bullet_emit(b, v, g->emitter, vel, g->gravity);		
 	}
 }
 
 void 
 shmup_game_update(shmup_game *g, double t, double dt)
 {				
-
-	if (glfwGetKey(GLFW_KEY_UP)) {
-		g->emitter.y += 10;
-	} else if (glfwGetKey(GLFW_KEY_DOWN)) {
-		g->emitter.y -= 10;
+	
+	{
+		static int mx, my;
+		glfwGetMousePos(&mx, &my);
+		g->emitter.x = (double) mx;
+		g->emitter.y = (double) 600-my;
 	}
 	
-	if (glfwGetKey(GLFW_KEY_LEFT)) {
-		g->emitter.x -= 10;
-	} else if (glfwGetKey(GLFW_KEY_RIGHT)) {
-		g->emitter.x += 10;
+	if (glfwGetKey(GLFW_KEY_SPACE) || glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT)) {
+		fire(g, 20, 0);
+	} else if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT)) {
+		fire(g, 20, 1);
 	}
 	
-	if (glfwGetKey(GLFW_KEY_SPACE)) {
-
-		fire(g, 10);
-		printf("%d/%d\n", g->bpool->n_active, g->bpool->size);
-	}
-	
-	
-	/* Do updates */
+	/* 
+	 * be careful with these, as this data may be moved by the bpool_resize
+	 * function!
+	 */
+	 
 	bullet *b = g->bpool->bdata;
-	vertex *v = g->bpool->vdata;		
+	vertex *v = g->bpool->vdata;
+	
+	/* Do updates */	
 	for (int i=0; i < g->bpool->n_active; ++i) {
 		bullet_update(&b[i], &v[i], dt);
 	}
 	
 	/* do collisions */
 	for (int i=0; i < g->bpool->n_active; ++i) {
-		if (b[i].pos.y < 0) {
-			bpool_deactivate(g->bpool, i);
-			i--; /* rollback the counter so that we can check the swapped element */
-			printf("%d/%d\n", g->bpool->n_active, g->bpool->size);
-		}
-	}	
 		
-//	if (t > 4 && g->bpool->size == 10) g->bpool = bpool_resize(g->bpool, 100);
-//	if (t > 8 && g->bpool->size == 100) g->bpool = bpool_resize(g->bpool, 1000);
-//	if (t > 12 && g->bpool->size == 1000) g->bpool = bpool_resize(g->bpool, 10000);
-//	if (t > 16 && g->bpool->size == 10000) g->bpool = bpool_resize(g->bpool, 100000);
-	
+		if (b[i].pos.y > 600 && b[i].vel.y > 0) {
+			b[i].vel.y *= -0.6;
+		} else if (b[i].pos.y < 0) {
+			/* deactivate and rollback i to checked the swapped element */
+			bpool_deactivate(g->bpool, i--);			
+		}		
+		if (b[i].pos.x < 0 && b[i].vel.x < 0 || b[i].pos.x > 800 && b[i].vel.x > 0) {
+			b[i].vel.x *= -0.6;
+		}		
+	}	
 }
 
 void shmup_game_draw(shmup_game *g) 
 {   	
+	vertex *v = g->bpool->vdata;
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	glPointSize(4.0);	
-	vertex *v = g->bpool->vdata;
+	glPointSize(3.0);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(2, GL_FLOAT, sizeof(vertex), &v[0].x);
 	glEnableClientState(GL_COLOR_ARRAY);

@@ -14,7 +14,7 @@ main(void)
 		exit( EXIT_FAILURE );
 	}
 
-	if(!glfwOpenWindow(800, 600, 5, 6, 5, 0, 8, 0, GLFW_WINDOW)) {
+	if(!glfwOpenWindow(800, 600, 8, 8, 8, 8, 8, 0, GLFW_WINDOW)) {
 		fprintf(stderr, "Failed to open GLFW window\n");
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -22,6 +22,7 @@ main(void)
 
 	glfwSetWindowTitle("ShmupEngine");
 //	glfwSetWindowSizeCallback( resize );
+	glfwSwapInterval(1);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();   

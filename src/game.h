@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <GL/glfw.h>
+#include <SOIL.h>
 
 #include "bullet.h"
 #include "vector.h"

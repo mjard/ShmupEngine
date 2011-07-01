@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <GL/glfw.h>
 
 #include "vector.h"
 
@@ -48,6 +49,7 @@ typedef struct bpool {
 	int n_active;
 	bullet *bdata;
 	vertex *vdata;
+	GLuint tex;
 } bpool;
 
 void bullet_init(bullet *b, vertex *v);

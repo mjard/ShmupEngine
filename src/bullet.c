@@ -90,6 +90,7 @@ bpool_resize(bpool *bp, int size)
 		
 	bpool *bp_new = bpool_new(size);
 	bp_new->n_active = bp->n_active;
+	bp_new->tex = bp->tex;
 	memcpy(bp_new->vdata, bp->vdata, sizeof(vertex) * bp->size);
 	memcpy(bp_new->bdata, bp->bdata, sizeof(bullet) * bp->size);
 	bpool_destroy(bp);

@@ -12,7 +12,22 @@ shmup_game_init()
 	g->quit = 0;	
 	g->emitter = v2(400,300);
 	g->gravity = v2(0, -250);	
-	g->bpool = bpool_new(1000);
+	g->bpool = bpool_new(4000);
+	
+	
+	/* load an image file directly as a new OpenGL texture */
+	g->bpool->tex = SOIL_load_OGL_texture(
+		"flare.tga",
+		SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID,
+		SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB
+	 );
+	
+	/* check for an error during the load process */
+	if( 0 == g->bpool->tex ) {
+		fprintf( stderr, "SOIL loading error: '%s'\n", SOIL_last_result());
+	}	
+	
 	return g;
 }
 
@@ -71,8 +86,8 @@ fire(shmup_game *g, int num, int col)
 		b = &g->bpool->bdata[index];
 		v = &g->bpool->vdata[index];
 		
-		speed = (float)rand()/RAND_MAX * 400;
-		angle = (float)rand()/RAND_MAX * M_PI ;
+		speed = 200.0 + (float)rand()/RAND_MAX * 400;
+		angle = (float)rand()/RAND_MAX * M_PI * 2;
 		vel = v2(cos(angle)*speed, sin(angle)*speed);
 		
 		if (col) {
@@ -146,12 +161,25 @@ void shmup_game_draw(shmup_game *g)
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	glPointSize(3.0);
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	
+	glPointSize(32.0f);
+	
+	glEnable(GL_POINT_SPRITE);
+	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);;	
 	glVertexPointer(2, GL_FLOAT, sizeof(vertex), &v[0].x);
-	glEnableClientState(GL_COLOR_ARRAY);
 	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vertex), &v[0].color);
 	glDrawArrays(GL_POINTS, 0, g->bpool->n_active);
+	
 	glfwSwapBuffers();
 }
 

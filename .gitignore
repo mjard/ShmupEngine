@@ -1,4 +1,5 @@
 *.o
+shmup
 .DS_Store
 lib/
 data/

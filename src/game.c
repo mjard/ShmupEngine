@@ -1,7 +1,7 @@
-//
-//  game.c
-//  ShmupEngine
-//
+/*
+ *  game.c
+ *  ShmupEngine
+ */
 
 #include "game.h"
 
@@ -13,20 +13,15 @@ shmup_game_init()
 	g->emitter = v2(400,300);
 	g->gravity = v2(0, -250);	
 	g->bpool = bpool_new(4000);
-	
-	
-	/* load an image file directly as a new OpenGL texture */
+			
 	g->bpool->tex = SOIL_load_OGL_texture(
 		"flare.tga",
 		SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID,
-		SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB
-	 );
+		SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB);
 	
-	/* check for an error during the load process */
-	if( 0 == g->bpool->tex ) {
-		fprintf( stderr, "SOIL loading error: '%s'\n", SOIL_last_result());
-	}	
+	if( 0 == g->bpool->tex )
+		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());
 	
 	return g;
 }
@@ -34,29 +29,31 @@ shmup_game_init()
 void 
 shmup_game_run(shmup_game *g) 
 {
-	double t = 0.0;
+	double t, current_time, accumulator;
+	double new_time, frame_time;
 	const double dt = 1.0f/60;
-	double currentTime = glfwGetTime();
-	double accumulator = 0.0;
+
+	t = 0.0;
+	current_time = glfwGetTime();
+	accumulator = 0.0;
 	
-	while (!g->quit) 
-	{
-		double newTime = glfwGetTime();
-		double frameTime = newTime - currentTime;
-		currentTime = newTime;        
-		accumulator += frameTime;
+	while (!g->quit) {
 		
-		while (accumulator >= dt)
-		{
+		new_time = glfwGetTime();
+		frame_time = new_time - current_time;
+		current_time = new_time;        
+		accumulator += frame_time;
+		
+		while (accumulator >= dt) {
 			shmup_game_update(g, t, dt);
 			accumulator -= dt;
 			t += dt;			
 		}
 		
 		shmup_game_draw(g);
-
-		if (glfwGetKey(GLFW_KEY_ESC) || !glfwGetWindowParam(GLFW_OPENED)) 
-			g->quit = 1;
+		
+		g->quit = glfwGetKey(GLFW_KEY_ESC);
+		g->quit |= !glfwGetWindowParam(GLFW_OPENED);			
 	}
 }
 
@@ -95,7 +92,8 @@ fire(shmup_game *g, int num, int col)
 			colorbase = rand() % 128;
 			v->color = colorbase;
 			v->color += colorbase * 0x100;
-			v->color += (colorbase + rand() % (256-colorbase)) * 0x10000;
+			v->color += (colorbase + rand() % (256-colorbase)) *
+				0x10000;
 			v->color += 0xFF000000;	
 		} else {
 			unsigned char colorbase;
@@ -154,6 +152,10 @@ shmup_game_update(shmup_game *g, double t, double dt)
 		}		
 	}	
 }
+
+/*
+ * This function draws the current scene.
+ */
 
 void shmup_game_draw(shmup_game *g) 
 {   	

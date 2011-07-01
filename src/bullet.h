@@ -1,7 +1,7 @@
-//
-//  bullet.h
-//  ShmupEngine
-//
+/*
+ *  bullet.h
+ *  ShmupEngine
+ */
 
 #ifndef BULLET_H
 #define BULLET_H
@@ -23,27 +23,18 @@ enum B_TYPE {
 	B_LUA		// pos, vel, acc, checks with lua for instructions
 };
 
-/* 
- * Bullet-type 
- */
 typedef struct bullet {
 	vec2d pos;
 	vec2d vel;
 	vec2d acc;
 } bullet;
 
-/* 
- * OpenGL struct for packing vertex data and batch rendering it 
- */
 typedef struct vertex {
 	float x, y;
 	unsigned int color;
 	float padding[1];
 } vertex;
 
-/* 
- * Container type to hold bullets and bullet vertex data.
- */
 typedef struct bpool {
 	int size;
 	int n_active;

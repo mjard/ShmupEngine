@@ -1,7 +1,7 @@
- //
-//  bullet.c
-//  ShmupEngine
-//
+/*
+ *  bullet.c
+ *  ShmupEngine
+ */
 
 #include "bullet.h"
 
@@ -58,17 +58,19 @@ bullet_update(bullet *b, vertex *v, float dt)
  * we just grab the one from bdata[n_alive] (This reprents the first dead one
  * in the list) and then increment n_alive.
  *
- * When we need to kill a bullet, we copy the bullet at bdata[n_alive-1] (this 
+ * When we need to kill a bullet, we copy the bullet at bdata[n_alive-1] (this
  * represents the last alive one) over top of the one we want to kill. Then we
  * just decrement n_alive.
- 
  */
 
 bpool * 
 bpool_new(int size)
 {	
-	int i;
-	bpool *bp = malloc(sizeof(bpool) + sizeof(vertex) * size + sizeof(bullet) * size);
+	int i, total;
+	bpool *bp;
+	
+	total = sizeof(bpool) + sizeof(vertex) * size + sizeof(bullet) * size;
+	bp = malloc(total);
 	bp->size = size;
 	bp->vdata = (vertex *)(bp + 1);
 	bp->bdata = (bullet *)(bp->vdata + size);
@@ -83,12 +85,14 @@ bpool_new(int size)
 bpool * 
 bpool_resize(bpool *bp, int size)
 {
+	bpool *bp_new;
+	
 	if (size <= bp->size) {
 		/* can't reduce size, YET! */
 		return bp;
 	}
 		
-	bpool *bp_new = bpool_new(size);
+	bp_new = bpool_new(size);
 	bp_new->n_active = bp->n_active;
 	bp_new->tex = bp->tex;
 	memcpy(bp_new->vdata, bp->vdata, sizeof(vertex) * bp->size);
@@ -109,20 +113,23 @@ bpool_activate(bpool *bp)
 	if (bp->n_active >= bp->size) {
 		fprintf(stderr, "bpool overrun!\n");
 		return -1;
-	}
-//	bullet_init(&bp->bdata[bp->n_active], &bp->vdata[bp->n_active]);
+	}	
 	return bp->n_active++;
 }
 
 void 
 bpool_deactivate(bpool *bp, int index)
 {
+	bullet *b;
+	vertex *v;
+	
 	if (index >= bp->size || index < 0) {
 		fprintf(stderr, "bpool underrun!");
 		exit(EXIT_FAILURE);
 	}
-	bullet *b = bp->bdata;
-	vertex *v = bp->vdata;
+	
+	b = bp->bdata;
+	v = bp->vdata;
 	memcpy(&b[index], &b[bp->n_active-1], sizeof(bullet));
 	memcpy(&v[index], &v[bp->n_active-1], sizeof(vertex));
 	bp->n_active--;

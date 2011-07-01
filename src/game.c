@@ -5,8 +5,10 @@
 
 #include "game.h"
 
-shmup_game * 
-shmup_game_init() 
+void fire(shmup_game *g, int num, int col);
+
+shmup_game *
+shmup_game_init()
 {
 	shmup_game *g = malloc(sizeof(shmup_game));	
 	g->quit = 0;	
@@ -23,6 +25,8 @@ shmup_game_init()
 	if( 0 == g->bpool->tex )
 		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());
 	
+	fire(g, 1000, 0);
+	fire(g, 1000, 1);
 	return g;
 }
 

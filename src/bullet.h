@@ -27,27 +27,21 @@ typedef struct bullet {
 	vec2d pos;
 	vec2d vel;
 	vec2d acc;
-} bullet;
-
-typedef struct vertex {
-	float x, y;
-	float vx, vy;
 	unsigned int color;
 	float padding[3];
-} vertex;
+} bullet;
 
 typedef struct bpool {
 	int size;
-	int n_active;
-	bullet *bdata;
-	vertex *vdata;
+	int n_active;	
 	GLuint tex;
 	GLuint prog;
+	bullet *bdata;
 } bpool;
 
-void bullet_init(bullet *b, vertex *v);
-void bullet_emit(bullet *b, vertex *v, vec2d pos, vec2d vel, vec2d acc);
-void bullet_update(bullet *b, vertex *v, float dt);
+void bullet_init(bullet *b);
+void bullet_emit(bullet *b, vec2d pos, vec2d vel, vec2d acc);
+void bullet_update(bullet *b, float dt);
 
 bpool * bpool_new(int size);
 bpool * bpool_resize(bpool *bp, int size);

@@ -17,7 +17,7 @@ shmup_game_init()
 	g->bpool = bpool_new(4000);
 			
 	g->bpool->tex = SOIL_load_OGL_texture(
-		"./data/arrow.tga",
+		"./data/flare.tga",
 		SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID,
 		0);
@@ -67,7 +67,6 @@ void
 fire(shmup_game *g, int num, int col)
 {
 	bullet *b;
-	vertex *v;
 	unsigned int i, index;
 	double angle, speed;
 	vec2d vel;
@@ -87,7 +86,6 @@ fire(shmup_game *g, int num, int col)
 		}
 		
 		b = &g->bpool->bdata[index];
-		v = &g->bpool->vdata[index];
 		
 		speed = 200.0 + (float)rand()/RAND_MAX * 400;
 		angle = (float)rand()/RAND_MAX * M_PI * 2;
@@ -96,21 +94,21 @@ fire(shmup_game *g, int num, int col)
 		if (col) {
 			unsigned char colorbase;
 			colorbase = rand() % 128;
-			v->color = colorbase;
-			v->color += colorbase * 0x100;
-			v->color += (colorbase + rand() % (256-colorbase)) *
+			b->color = colorbase;
+			b->color += colorbase * 0x100;
+			b->color += (colorbase + rand() % (256-colorbase)) *
 				0x10000;
-			v->color += 0xFF000000;	
+			b->color += 0xFF000000;	
 		} else {
 			unsigned char colorbase;
 			colorbase = rand() % 128;
-			v->color = (colorbase + rand() % (256-colorbase));
-			v->color += colorbase * 0x100;
-			v->color += colorbase * 0x10000;
-			v->color += 0xFF000000;
+			b->color = (colorbase + rand() % (256-colorbase));
+			b->color += colorbase * 0x100;
+			b->color += colorbase * 0x10000;
+			b->color += 0xFF000000;
 		}
 		
-		bullet_emit(b, v, g->emitter, vel, g->gravity);		
+		bullet_emit(b, g->emitter, vel, g->gravity);		
 	}
 }
 
@@ -137,11 +135,10 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	 */
 	 
 	bullet *b = g->bpool->bdata;
-	vertex *v = g->bpool->vdata;
 	
 	/* Do updates */	
 	for (int i=0; i < g->bpool->n_active; ++i) {
-		bullet_update(&b[i], &v[i], dt);
+		bullet_update(&b[i], dt);
 	}
 	
 	/* do collisions */
@@ -151,7 +148,7 @@ shmup_game_update(shmup_game *g, double t, double dt)
 			b[i].vel.y *= -0.6;
 		} else if (b[i].pos.y < 0) {
 			/* deactivate and rollback i to checked the swapped element */
-			bpool_deactivate(g->bpool, i--);			
+			bpool_deactivate(g->bpool, i--); 
 		}		
 		if (b[i].pos.x < 0 && b[i].vel.x < 0 || b[i].pos.x > 800 && b[i].vel.x > 0) {
 			b[i].vel.x *= -0.6;
@@ -165,7 +162,7 @@ shmup_game_update(shmup_game *g, double t, double dt)
 
 void shmup_game_draw(shmup_game *g) 
 {   	
-	vertex *v = g->bpool->vdata;
+	bullet *b = g->bpool->bdata;
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -180,19 +177,19 @@ void shmup_game_draw(shmup_game *g)
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_TEXTURE_2D);
 		
-	if (0) {		
+	if (1) {
 		glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
 		glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);;	
-		glVertexPointer(2, GL_FLOAT, sizeof(vertex), &v[0].x);
-		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vertex), &v[0].color);
+		glVertexPointer(2, GL_DOUBLE, sizeof(bullet), &b[0].pos);
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(bullet), &b[0].color);
 	} else {
 		glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);;	
-		glVertexPointer(4, GL_FLOAT, sizeof(vertex), &v[0].x);
-		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vertex), &v[0].color);
+		glVertexPointer(4, GL_DOUBLE, sizeof(bullet), &b[0].pos);
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(bullet), &b[0].color);
 		glUseProgram(g->bpool->prog);
 		glUniform1iARB(glGetUniformLocation(g->bpool->prog, "tex"), 0);
 	}

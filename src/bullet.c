@@ -6,45 +6,33 @@
 #include "bullet.h"
 
 void
-bullet_init(bullet *b, vertex *v)
+bullet_init(bullet *b)
 {
 	unsigned char colorbase;
 	
 	b->pos = v2zero;
 	b->vel = v2zero;
 	b->acc = v2zero;
-	v->x = b->pos.x; /* copy vertex data for OpenGL */
-	v->y = b->pos.y; /* copy vertex data for OpenGL */
-	v->vx = b->vel.x;
-	v->vy = b->vel.y;
 	
 	colorbase = rand() % 128;
-	v->color = colorbase;
-	v->color += colorbase * 0x100;
-	v->color += (colorbase + rand() % (256-colorbase)) * 0x10000;
-	v->color += 0xFF000000;
+	b->color = colorbase;
+	b->color += colorbase * 0x100;
+	b->color += (colorbase + rand() % (256-colorbase)) * 0x10000;
+	b->color += 0xFF000000;
 }
 
 void
-bullet_emit(bullet *b, vertex *v, vec2d pos, vec2d vel, vec2d acc) {
+bullet_emit(bullet *b, vec2d pos, vec2d vel, vec2d acc) {
 	b->pos = pos;
 	b->vel = vel;
 	b->acc = acc;
-	v->x = b->pos.x; /* copy vertex data for OpenGL */
-	v->y = b->pos.y; /* copy vertex data for OpenGL */
-	v->vx = b->vel.x;
-	v->vy = b->vel.y;
 }
 
 void 
-bullet_update(bullet *b, vertex *v, float dt)
+bullet_update(bullet *b, float dt)
 {
 	b->pos = v2add(b->pos, v2mul(b->vel, dt));	
 	b->vel = v2add(b->vel, v2mul(b->acc, dt));	
-	v->x = b->pos.x; /* copy vertex data for OpenGL */
-	v->y = b->pos.y; /* copy vertex data for OpenGL */
-	v->vx = b->vel.x;
-	v->vy = b->vel.y;
 }
 
 
@@ -75,15 +63,14 @@ bpool_new(int size)
 	int i, total;
 	bpool *bp;
 	
-	total = sizeof(bpool) + sizeof(vertex) * size + sizeof(bullet) * size;
+	total = sizeof(bpool) + sizeof(bullet) * size;
 	bp = malloc(total);
 	bp->size = size;
-	bp->vdata = (vertex *)(bp + 1);
-	bp->bdata = (bullet *)(bp->vdata + size);
+	bp->bdata = (bullet *)(bp + 1);
 	bp->n_active = 0;
 	
 	for (i=0; i < size; ++i)
-		bullet_init(&bp->bdata[i], &bp->vdata[i]);
+		bullet_init(&bp->bdata[i]);
 	
 	return bp;
 }
@@ -101,7 +88,6 @@ bpool_resize(bpool *bp, int size)
 	bp_new = bpool_new(size);
 	bp_new->n_active = bp->n_active;
 	bp_new->tex = bp->tex;
-	memcpy(bp_new->vdata, bp->vdata, sizeof(vertex) * bp->size);
 	memcpy(bp_new->bdata, bp->bdata, sizeof(bullet) * bp->size);
 	bpool_destroy(bp);
 	return bp_new;
@@ -125,18 +111,15 @@ bpool_activate(bpool *bp)
 
 void 
 bpool_deactivate(bpool *bp, int index)
-{
-	bullet *b;
-	vertex *v;
-	
+{	
 	if (index >= bp->size || index < 0) {
 		fprintf(stderr, "bpool underrun!");
 		exit(EXIT_FAILURE);
 	}
-	
-	b = bp->bdata;
-	v = bp->vdata;
-	memcpy(&b[index], &b[bp->n_active-1], sizeof(bullet));
-	memcpy(&v[index], &v[bp->n_active-1], sizeof(vertex));
+	bp->bdata[index] = bp->bdata[bp->n_active-1];
 	bp->n_active--;
+	
+	//	bullet *b;
+	//	b = bp->bdata;
+	//	memcpy(&b[index], &b[bp->n_active-1], sizeof(bullet));
 }

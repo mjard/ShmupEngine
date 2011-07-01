@@ -17,7 +17,7 @@ shmup_game_init()
 	g->bpool = bpool_new(4000);
 			
 	g->bpool->tex = SOIL_load_OGL_texture(
-		"flare.tga",
+		"./data/flare.tga",
 		SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID,
 		SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB);

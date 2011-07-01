@@ -9,8 +9,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <GL/glfw.h>
-#include <SOIL.h>
 
+#include "soil/SOIL.h"
 #include "bullet.h"
 #include "vector.h"
 #include "collision.h"

@@ -14,7 +14,7 @@ main(void)
 		exit( EXIT_FAILURE );
 	}
 
-	if(!glfwOpenWindow(800, 600, 8, 8, 8, 8, 8, 0, GLFW_WINDOW)) {
+	if(!glfwOpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT, 8, 8, 8, 8, 8, 0, GLFW_FULLSCREEN)) {
 		fprintf(stderr, "Failed to open GLFW window\n");
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -26,7 +26,7 @@ main(void)
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();   
-	glOrtho(0, 800, 0, 600, 100, -100);
+	glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, 100, -100);
 	glMatrixMode(GL_MODELVIEW);
 	
 	g = shmup_game_init();

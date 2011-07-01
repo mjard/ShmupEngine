@@ -13,29 +13,26 @@ shmup_game_init()
 	shmup_game *g = malloc(sizeof(shmup_game));	
 	g->render_type = 1;
 	g->quit = 0;	
-	g->emitter = v2(400,300);
+	g->emitter = v2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	g->gravity = v2(0, -250);	
 	g->bpool = bpool_new(4000);
 			
-	g->bpool->tex[0] = SOIL_load_OGL_texture(
-		"./data/flare.tga",
-		SOIL_LOAD_AUTO,
-		SOIL_CREATE_NEW_ID,
-		0);
+	g->bpool->tex[0] = SOIL_load_OGL_texture("./data/flare.tga",
+						 SOIL_LOAD_AUTO,
+						 SOIL_CREATE_NEW_ID, 0);
 	
 	if(g->bpool->tex[0] == 0)
 		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());
 	
-	g->bpool->tex[1] = SOIL_load_OGL_texture(
-						 "./data/arrow.tga",
+	g->bpool->tex[1] = SOIL_load_OGL_texture("./data/arrow.tga",
 						 SOIL_LOAD_AUTO,
-						 SOIL_CREATE_NEW_ID,
-						 0);
+						 SOIL_CREATE_NEW_ID, 0);
 	
 	if(g->bpool->tex[1] == 0)
 		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());	
 	
-	g->bpool->prog = load_shaders("./data/glsl/bullets.vsh", "./data/glsl/bullets.fsh");
+	g->bpool->prog = load_shaders("./data/glsl/bullets.vsh", 
+				      "./data/glsl/bullets.fsh");
 	
 	fire(g, 1000, 0);
 	fire(g, 1000, 1);
@@ -158,13 +155,13 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	/* do collisions */
 	for (int i=0; i < g->bpool->n_active; ++i) {
 		
-		if (b[i].pos.y > 600 && b[i].vel.y > 0) {
+		if (b[i].pos.y > WINDOW_HEIGHT && b[i].vel.y > 0) {
 			b[i].vel.y *= -0.6;
 		} else if (b[i].pos.y < 0) {
 			/* deactivate and rollback i to checked the swapped element */
 			bpool_deactivate(g->bpool, i--); 
 		}		
-		if (b[i].pos.x < 0 && b[i].vel.x < 0 || b[i].pos.x > 800 && b[i].vel.x > 0) {
+		if (b[i].pos.x < 0 && b[i].vel.x < 0 || b[i].pos.x > WINDOW_WIDTH && b[i].vel.x > 0) {
 			b[i].vel.x *= -0.6;
 		}		
 	}	
@@ -174,7 +171,8 @@ shmup_game_update(shmup_game *g, double t, double dt)
  * This function draws the current scene.
  */
 
-void shmup_game_draw(shmup_game *g) 
+void 
+shmup_game_draw(shmup_game *g) 
 {   	
 	bullet *b = g->bpool->bdata;
 	
@@ -184,29 +182,30 @@ void shmup_game_draw(shmup_game *g)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glDisable(GL_DEPTH_TEST);
-	glDepthMask(GL_FALSE);
+//	glDepthFunc();
+//	glDepthMask(GL_FALSE);
 	
-	glPointSize(32.0f);
+	glPointSize(16.0f);
 	
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_TEXTURE_2D);
 		
-	if (g->render_type == 1) {
+	if (g->render_type == 1) {		
 		glBindTexture(GL_TEXTURE_2D, g->bpool->tex[0]);
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);;	
+		glEnableClientState(GL_COLOR_ARRAY);
 		glVertexPointer(2, GL_DOUBLE, sizeof(bullet), &b[0].pos);
 		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(bullet), &b[0].color);
 	} else {
 		glBindTexture(GL_TEXTURE_2D, g->bpool->tex[1]);
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);;	
+		glEnableClientState(GL_COLOR_ARRAY);
 		glVertexPointer(4, GL_DOUBLE, sizeof(bullet), &b[0].pos);
 		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(bullet), &b[0].color);
 		glUseProgram(g->bpool->prog);
-		glUniform1iARB(glGetUniformLocation(g->bpool->prog, "tex"), 0);
+//		glUniform1iARB(glGetUniformLocation(g->bpool->prog, "tex"), 0);
 	}
 	
 	glDrawArrays(GL_POINTS, 0, g->bpool->n_active);	

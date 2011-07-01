@@ -1,34 +1,38 @@
 #import "shader.h"
 
 char * 
-read_file(const char *f) 
+read_file(const char *filename) 
 {	
 	FILE *fp;
 	long size;
 	char *buffer;
 	size_t result;
 	
-	fp = fopen(f , "r");
-	if (fp == NULL) goto error;
+	fp = fopen(filename , "r");
+	if (fp == NULL) goto error_open;
 	
 	fseek (fp, 0, SEEK_END);
 	size = ftell(fp);
 	rewind (fp);
 	
-	buffer = (char*) malloc(sizeof(char)*size);
-	if (buffer == NULL) goto error;
+	buffer = (char*) malloc(sizeof(char) * size + 1);
+	if (buffer == NULL) goto error_malloc;
 	
 	result = fread(buffer, 1, size, fp);
-	if (result != size) goto error;
+	if (result != size) goto error_fread;
+	
+	buffer[size] = '\0';
 	
 	fclose (fp);
 	return buffer;
 	
-error:
-	
-	fprintf (stderr, "Error loading shader: %s", f); 
+error_fread:
+	free(buffer);
+error_malloc:
+	fclose(fp);
+error_open:	
+	fprintf (stderr, "Error reading file: %s", filename); 
 	exit(EXIT_FAILURE);
-	
 }
 
 GLuint 
@@ -44,11 +48,25 @@ compile_shaders(const char *vsh_src, const char *fsh_src)
 	glShaderSource(vsh, 1, &vsh_src, &size);
 	glCompileShader(vsh);
 
+	glGetShaderInfoLog(vsh, 200, &log_size, info_log);	
+	if (strstr(info_log, "ERROR") != NULL) {
+		fprintf(stderr, "vsh info: %s\n", info_log);
+		fprintf(stderr, "vsh:\n%s\n", vsh_src);
+		exit(EXIT_FAILURE);
+	}	
+	
 	fsh = glCreateShader(GL_FRAGMENT_SHADER);
 	size = (GLint) strlen(fsh_src);
 	glShaderSource(fsh, 1, &fsh_src, &size);
 	glCompileShader(fsh);
 	
+	glGetShaderInfoLog(fsh, 200, &log_size, info_log);	
+	if (strstr(info_log, "ERROR") != NULL) {
+		fprintf(stderr, "fsh info: %s\n", info_log);
+		fprintf(stderr, "fsh:\n%s\n", fsh_src);
+		exit(EXIT_FAILURE);
+	}	
+		
 	prog = glCreateProgram();	
 	glAttachShader(prog, vsh);
 	glAttachShader(prog, fsh);
@@ -56,10 +74,13 @@ compile_shaders(const char *vsh_src, const char *fsh_src)
 			
 	glDeleteShader(vsh);
 	glDeleteShader(fsh);
-	
-	glGetProgramInfoLog(prog, 10000, &log_size, info_log);
-	fprintf(stderr, "%s\n", info_log);
-			
+		
+	glGetProgramInfoLog(prog, 200, &log_size, info_log);
+	if (strstr(info_log, "ERROR") != NULL) {
+		fprintf(stderr, "prog info: %s\n", info_log);
+		exit(EXIT_FAILURE);
+	}	
+
 	return prog;
 }
 

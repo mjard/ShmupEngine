@@ -11,19 +11,29 @@ shmup_game *
 shmup_game_init()
 {
 	shmup_game *g = malloc(sizeof(shmup_game));	
+	g->render_type = 1;
 	g->quit = 0;	
 	g->emitter = v2(400,300);
 	g->gravity = v2(0, -250);	
 	g->bpool = bpool_new(4000);
 			
-	g->bpool->tex = SOIL_load_OGL_texture(
+	g->bpool->tex[0] = SOIL_load_OGL_texture(
 		"./data/flare.tga",
 		SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID,
 		0);
 	
-	if(g->bpool->tex == 0)
+	if(g->bpool->tex[0] == 0)
 		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());
+	
+	g->bpool->tex[1] = SOIL_load_OGL_texture(
+						 "./data/arrow.tga",
+						 SOIL_LOAD_AUTO,
+						 SOIL_CREATE_NEW_ID,
+						 0);
+	
+	if(g->bpool->tex[1] == 0)
+		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());	
 	
 	g->bpool->prog = load_shaders("./data/glsl/bullets.vsh", "./data/glsl/bullets.fsh");
 	
@@ -99,6 +109,7 @@ fire(shmup_game *g, int num, int col)
 			b->color += (colorbase + rand() % (256-colorbase)) *
 				0x10000;
 			b->color += 0xFF000000;	
+			b->btype = B_REG;
 		} else {
 			unsigned char colorbase;
 			colorbase = rand() % 128;
@@ -106,6 +117,7 @@ fire(shmup_game *g, int num, int col)
 			b->color += colorbase * 0x100;
 			b->color += colorbase * 0x10000;
 			b->color += 0xFF000000;
+			b->btype = B_ACCEL;
 		}
 		
 		bullet_emit(b, g->emitter, vel, g->gravity);		
@@ -128,6 +140,8 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	} else if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT)) {
 		fire(g, 20, 1);
 	}
+	if (glfwGetKey('1')) g->render_type=1;
+	if (glfwGetKey('2')) g->render_type=2;
 	
 	/* 
 	 * be careful with these, as this data may be moved by the bpool_resize
@@ -177,15 +191,16 @@ void shmup_game_draw(shmup_game *g)
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_TEXTURE_2D);
 		
-	if (1) {
-		glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
-		glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+	if (g->render_type == 1) {
+		glBindTexture(GL_TEXTURE_2D, g->bpool->tex[0]);
+		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);;	
 		glVertexPointer(2, GL_DOUBLE, sizeof(bullet), &b[0].pos);
 		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(bullet), &b[0].color);
 	} else {
-		glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
+		glBindTexture(GL_TEXTURE_2D, g->bpool->tex[1]);
+		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);;	
 		glVertexPointer(4, GL_DOUBLE, sizeof(bullet), &b[0].pos);

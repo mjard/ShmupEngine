@@ -87,7 +87,8 @@ bpool_resize(bpool *bp, int size)
 		
 	bp_new = bpool_new(size);
 	bp_new->n_active = bp->n_active;
-	bp_new->tex = bp->tex;
+	bp_new->tex[0] = bp->tex[0];
+	bp_new->tex[1] = bp->tex[1];
 	memcpy(bp_new->bdata, bp->bdata, sizeof(bullet) * bp->size);
 	bpool_destroy(bp);
 	return bp_new;

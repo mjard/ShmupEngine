@@ -27,6 +27,7 @@ typedef struct shmup_game {
 	bpool *bpool;
 	vec2d emitter;
 	vec2d gravity;	
+	int render_type;
 } shmup_game;
 
 shmup_game * shmup_game_init();

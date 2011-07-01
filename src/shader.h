@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <GL/glfw.h>
 
-char * read_file(const char *f);
+char * read_file(const char *filename);
 GLuint compile_shaders(const char *vsh_src, const char *fsh_src);
 GLuint load_shaders(const char *vsh_file, const char *fsh_file);
 

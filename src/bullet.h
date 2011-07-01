@@ -28,13 +28,14 @@ typedef struct bullet {
 	vec2d vel;
 	vec2d acc;
 	unsigned int color;
-	float padding[3];
+	unsigned int btype;
+	float padding[2];
 } bullet;
 
 typedef struct bpool {
 	int size;
 	int n_active;	
-	GLuint tex;
+	GLuint tex[2];
 	GLuint prog;
 	bullet *bdata;
 } bpool;

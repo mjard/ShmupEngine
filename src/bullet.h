@@ -31,8 +31,9 @@ typedef struct bullet {
 
 typedef struct vertex {
 	float x, y;
+	float vx, vy;
 	unsigned int color;
-	float padding[1];
+	float padding[3];
 } vertex;
 
 typedef struct bpool {
@@ -41,6 +42,7 @@ typedef struct bpool {
 	bullet *bdata;
 	vertex *vdata;
 	GLuint tex;
+	GLuint prog;
 } bpool;
 
 void bullet_init(bullet *b, vertex *v);

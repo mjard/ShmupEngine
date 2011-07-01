@@ -15,6 +15,8 @@ bullet_init(bullet *b, vertex *v)
 	b->acc = v2zero;
 	v->x = b->pos.x; /* copy vertex data for OpenGL */
 	v->y = b->pos.y; /* copy vertex data for OpenGL */
+	v->vx = b->vel.x;
+	v->vy = b->vel.y;
 	
 	colorbase = rand() % 128;
 	v->color = colorbase;
@@ -30,6 +32,8 @@ bullet_emit(bullet *b, vertex *v, vec2d pos, vec2d vel, vec2d acc) {
 	b->acc = acc;
 	v->x = b->pos.x; /* copy vertex data for OpenGL */
 	v->y = b->pos.y; /* copy vertex data for OpenGL */
+	v->vx = b->vel.x;
+	v->vy = b->vel.y;
 }
 
 void 
@@ -39,6 +43,8 @@ bullet_update(bullet *b, vertex *v, float dt)
 	b->vel = v2add(b->vel, v2mul(b->acc, dt));	
 	v->x = b->pos.x; /* copy vertex data for OpenGL */
 	v->y = b->pos.y; /* copy vertex data for OpenGL */
+	v->vx = b->vel.x;
+	v->vy = b->vel.y;
 }
 
 

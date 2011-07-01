@@ -17,13 +17,15 @@ shmup_game_init()
 	g->bpool = bpool_new(4000);
 			
 	g->bpool->tex = SOIL_load_OGL_texture(
-		"./data/flare.tga",
+		"./data/arrow.tga",
 		SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID,
-		SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB);
+		0);
 	
-	if( 0 == g->bpool->tex )
+	if(g->bpool->tex == 0)
 		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());
+	
+	g->bpool->prog = load_shaders("./data/glsl/bullets.vsh", "./data/glsl/bullets.fsh");
 	
 	fire(g, 1000, 0);
 	fire(g, 1000, 1);
@@ -176,15 +178,27 @@ void shmup_game_draw(shmup_game *g)
 	glPointSize(32.0f);
 	
 	glEnable(GL_POINT_SPRITE);
-	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
+		
+	if (0) {		
+		glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
+		glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);;	
+		glVertexPointer(2, GL_FLOAT, sizeof(vertex), &v[0].x);
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vertex), &v[0].color);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, g->bpool->tex);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);;	
+		glVertexPointer(4, GL_FLOAT, sizeof(vertex), &v[0].x);
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vertex), &v[0].color);
+		glUseProgram(g->bpool->prog);
+		glUniform1iARB(glGetUniformLocation(g->bpool->prog, "tex"), 0);
+	}
 	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);;	
-	glVertexPointer(2, GL_FLOAT, sizeof(vertex), &v[0].x);
-	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vertex), &v[0].color);
-	glDrawArrays(GL_POINTS, 0, g->bpool->n_active);
+	glDrawArrays(GL_POINTS, 0, g->bpool->n_active);	
+	glUseProgram(0);
 	
 	glfwSwapBuffers();
 }

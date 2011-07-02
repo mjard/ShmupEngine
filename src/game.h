@@ -21,8 +21,6 @@
 #endif
 
 #define MAX_BULLETS 200000
-#define WINDOW_WIDTH 1440
-#define WINDOW_HEIGHT 900
 
 typedef struct shmup_game {
 	int quit;

@@ -8,13 +8,17 @@ int
 main(void)
 {
 	shmup_game *g;
+	GLFWvidmode d_mode;    
 	
 	if(!glfwInit()){
 		fprintf( stderr, "Failed to initialize GLFW\n" );
 		exit( EXIT_FAILURE );
 	}
 
-	if(!glfwOpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT, 8, 8, 8, 8, 8, 0, GLFW_FULLSCREEN)) {
+	glfwGetDesktopMode(&d_mode);
+
+	if(!glfwOpenWindow(d_mode.Width, d_mode.Height, d_mode.RedBits, 
+	        d_mode.GreenBits, d_mode.BlueBits, 8, 8, 0, GLFW_FULLSCREEN)) {
 		fprintf(stderr, "Failed to open GLFW window\n");
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -24,7 +28,7 @@ main(void)
 //	glfwSetWindowSizeCallback( resize );
 	glfwSwapInterval(1);
 	glfwSetMousePos(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
-	glfwEnable(GLFW_MOUSE_CURSOR);
+	//glfwEnable(GLFW_MOUSE_CURSOR);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();   

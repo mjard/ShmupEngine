@@ -1,5 +1,4 @@
-SOURCES=$(shell find . -type f -name "*.c")
-OBJECTS=$(SOURCES:.c=.o)
+GAME_SOURCE=src/
 EXECUTABLE=shmup
 
 CC=gcc
@@ -17,6 +16,11 @@ ifeq ($(UNAME_S), Darwin)
 CC=clang
 LDFLAGS += -framework OpenGL -framework Cocoa
 endif
+
+SOURCES=$(shell find $(GAME_SOURCE) -type f -name "*.c")
+OBJECTS=$(SOURCES:.c=.o)
+
+.PHONY : all clean
 
 all: $(SOURCES) $(EXECUTABLE)
 

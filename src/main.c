@@ -23,6 +23,8 @@ main(void)
 	glfwSetWindowTitle("ShmupEngine");
 //	glfwSetWindowSizeCallback( resize );
 	glfwSwapInterval(1);
+	glfwSetMousePos(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+	glfwEnable(GLFW_MOUSE_CURSOR);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();   

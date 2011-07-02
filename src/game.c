@@ -129,7 +129,7 @@ shmup_game_update(shmup_game *g, double t, double dt)
 		static int mx, my;
 		glfwGetMousePos(&mx, &my);
 		g->emitter.x = (double) mx;
-		g->emitter.y = (double) 600-my;
+		g->emitter.y = (double) WINDOW_HEIGHT-my;
 	}
 	
 	if (glfwGetKey(GLFW_KEY_SPACE) || glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT)) {

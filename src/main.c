@@ -27,12 +27,12 @@ main(void)
 	glfwSetWindowTitle("ShmupEngine");
 //	glfwSetWindowSizeCallback( resize );
 	glfwSwapInterval(1);
-	glfwSetMousePos(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
-	//glfwEnable(GLFW_MOUSE_CURSOR);
+	glfwSetMousePos(d_mode.Width/2, d_mode.Height/2);
+	glfwEnable(GLFW_MOUSE_CURSOR);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();   
-	glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, 100, -100);
+	glOrtho(0, d_mode.Width, 0, d_mode.Height, 100, -100);
 	glMatrixMode(GL_MODELVIEW);
 	
 	g = shmup_game_init();

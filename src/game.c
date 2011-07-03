@@ -10,10 +10,13 @@ void fire(shmup_game *g, int num, int col);
 shmup_game *
 shmup_game_init()
 {
-	shmup_game *g = malloc(sizeof(shmup_game));	
+	shmup_game *g = malloc(sizeof(shmup_game));
+
+    glfwGetWindowSize(&g->window_width, &g->window_height);
+
 	g->render_type = 1;
 	g->quit = 0;	
-	g->emitter = v2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+	g->emitter = v2(g->window_width / 2, g->window_height / 2);
 	g->gravity = v2(0, -250);	
 	g->bpool = bpool_new(4000);
 			
@@ -129,7 +132,7 @@ shmup_game_update(shmup_game *g, double t, double dt)
 		static int mx, my;
 		glfwGetMousePos(&mx, &my);
 		g->emitter.x = (double) mx;
-		g->emitter.y = (double) WINDOW_HEIGHT-my;
+		g->emitter.y = (double) g->window_height-my;
 	}
 	
 	if (glfwGetKey(GLFW_KEY_SPACE) || glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT)) {
@@ -155,13 +158,13 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	/* do collisions */
 	for (int i=0; i < g->bpool->n_active; ++i) {
 		
-		if (b[i].pos.y > WINDOW_HEIGHT && b[i].vel.y > 0) {
+		if (b[i].pos.y > g->window_height && b[i].vel.y > 0) {
 			b[i].vel.y *= -0.6;
 		} else if (b[i].pos.y < 0) {
 			/* deactivate and rollback i to checked the swapped element */
 			bpool_deactivate(g->bpool, i--); 
 		}		
-		if (b[i].pos.x < 0 && b[i].vel.x < 0 || b[i].pos.x > WINDOW_WIDTH && b[i].vel.x > 0) {
+		if (b[i].pos.x < 0 && b[i].vel.x < 0 || b[i].pos.x > g->window_width && b[i].vel.x > 0) {
 			b[i].vel.x *= -0.6;
 		}		
 	}	

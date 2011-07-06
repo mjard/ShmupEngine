@@ -89,6 +89,7 @@ bpool_resize(bpool *bp, int size)
 	bp_new->n_active = bp->n_active;
 	bp_new->tex[0] = bp->tex[0];
 	bp_new->tex[1] = bp->tex[1];
+	bp_new->prog = bp->prog;
 	memcpy(bp_new->bdata, bp->bdata, sizeof(bullet) * bp->size);
 	bpool_destroy(bp);
 	return bp_new;
@@ -119,8 +120,4 @@ bpool_deactivate(bpool *bp, int index)
 	}
 	bp->bdata[index] = bp->bdata[bp->n_active-1];
 	bp->n_active--;
-	
-	//	bullet *b;
-	//	b = bp->bdata;
-	//	memcpy(&b[index], &b[bp->n_active-1], sizeof(bullet));
 }

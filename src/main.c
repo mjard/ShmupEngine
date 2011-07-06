@@ -5,16 +5,16 @@
 #include "game.h"
 
 int
-main(void)
+main(int argc, char **argv)
 {
 	shmup_game *g;
 	
-	if(!glfwInit()){
+	if(!glfwInit()) {
 		fprintf( stderr, "Failed to initialize GLFW\n" );
-		exit( EXIT_FAILURE );
+		exit(EXIT_FAILURE);
 	}
 
-	if(!glfwOpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT, 8, 8, 8, 8, 8, 0, GLFW_FULLSCREEN)) {
+	if(!glfwOpenWindow(WINDOW_WIDTH,WINDOW_HEIGHT,8,8,8,8,8,0,GLFW_WINDOW)){
 		fprintf(stderr, "Failed to open GLFW window\n");
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -32,9 +32,14 @@ main(void)
 	glMatrixMode(GL_MODELVIEW);
 	
 	g = shmup_game_init();
+	
+	g->network_type = CLIENT;
+	for (int i=0; i<argc; ++i) {
+		if (strcmp("-a", argv[i])) g->network_type = SERVER;
+	}
+		
 	shmup_game_run(g);
 	shmup_game_close(g);
-
 	
 	glfwTerminate();	
 	exit(EXIT_SUCCESS);

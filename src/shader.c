@@ -4,22 +4,24 @@ char *
 read_file(const char *filename) 
 {	
 	FILE *fp;
-	long size;
-	char *buffer;
+	long size;	
 	size_t result;
+	char *buffer;
 	
 	fp = fopen(filename , "r");
-	if (fp == NULL) goto error_open;
+	if (fp == NULL) 
+		goto error_open;
 	
 	fseek (fp, 0, SEEK_END);
 	size = ftell(fp);
 	rewind (fp);
 	
 	buffer = (char*) malloc(sizeof(char) * size + 1);
-	if (buffer == NULL) goto error_malloc;
-	
+	if (buffer == NULL) 
+		goto error_malloc;	
 	result = fread(buffer, 1, size, fp);
-	if (result != size) goto error_fread;
+	if (result != size) 
+		goto error_fread;
 	
 	buffer[size] = '\0';
 	
@@ -87,9 +89,12 @@ compile_shaders(const char *vsh_src, const char *fsh_src)
 GLuint 
 load_shaders(const char *vsh_file, const char *fsh_file)
 {
-	GLchar *vsh_src = read_file(vsh_file);
-	GLchar *fsh_src = read_file(fsh_file);
-	GLuint p = compile_shaders(vsh_src, fsh_src);
+	GLchar *fsh_src, *vsh_src;
+	GLuint p;
+	
+	vsh_src = read_file(vsh_file);
+	fsh_src = read_file(fsh_file);
+	p = compile_shaders(vsh_src, fsh_src);
 	free(vsh_src);
 	free(fsh_src);
 	return p;

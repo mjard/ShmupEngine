@@ -5,45 +5,71 @@
 
 #include "game.h"
 
-void fire(shmup_game *g, int num, int col);
-
 shmup_game *
 shmup_game_init()
 {
-	shmup_game *g = malloc(sizeof(shmup_game));	
+	ENetAddress e;
+	shmup_game *g;
+	
+	g = malloc(sizeof(shmup_game));
 	g->render_type = 1;
 	g->quit = 0;	
 	g->emitter = v2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	g->gravity = v2(0, -250);	
-	g->bpool = bpool_new(4000);
-			
+	g->bpool = bpool_new(2000);	
+	
 	g->bpool->tex[0] = SOIL_load_OGL_texture("./data/flare.tga",
 						 SOIL_LOAD_AUTO,
-						 SOIL_CREATE_NEW_ID, 0);
-	
+						 SOIL_CREATE_NEW_ID, 0);	
 	if(g->bpool->tex[0] == 0)
 		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());
 	
 	g->bpool->tex[1] = SOIL_load_OGL_texture("./data/arrow.tga",
 						 SOIL_LOAD_AUTO,
 						 SOIL_CREATE_NEW_ID, 0);
-	
 	if(g->bpool->tex[1] == 0)
 		fprintf(stderr, "loading error: '%s'\n", SOIL_last_result());	
 	
 	g->bpool->prog = load_shaders("./data/glsl/bullets.vsh", 
 				      "./data/glsl/bullets.fsh");
 	
-	fire(g, 1000, 0);
-	fire(g, 1000, 1);
+	if (enet_initialize () != 0) {
+		fprintf (stderr, "An error occurred while initializing ENet.\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	if (g->network_type == SERVER) {
+		e.host = ENET_HOST_ANY;
+		e.port = 4000;
+		g->host = enet_host_create(&e, 4, 2, 0, 0);
+	} else {
+		g->host = enet_host_create(NULL, 4, 2, 0, 0);
+	}
+	
+	g->player[0].pos = v2(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+	g->player[0].vel = v2zero;
+	g->player[0].acc = v2zero;
+	
+//	fire(g, 1000, 0);
+//	fire(g, 1000, 1);
+	
 	return g;
+}
+
+void 
+shmup_game_close(shmup_game *g) 
+{
+	bpool_destroy(g->bpool);
+	free(g);
+	enet_host_destroy(g->host);
+	enet_deinitialize();
 }
 
 void 
 shmup_game_run(shmup_game *g) 
 {
-	double t, current_time, accumulator;
-	double new_time, frame_time;
+	double accumulator, current_time, t;
+	double frame_time, new_time;
 	const double dt = 1.0f/60;
 
 	t = 0.0;
@@ -71,13 +97,13 @@ shmup_game_run(shmup_game *g)
 }
 
 void
-fire(shmup_game *g, int num, int col)
+shmup_game_fire(shmup_game *g, int num, int col)
 {
 	bullet *b;
+	vec2d vel;
 	unsigned int i, index;
 	double angle, speed;
-	vec2d vel;
-	
+		
 	for (i=0; i<num; ++i) {
 		index = bpool_activate(g->bpool);
 		if (index == -1){
@@ -125,29 +151,60 @@ void
 shmup_game_update(shmup_game *g, double t, double dt)
 {				
 	
-	{
-		static int mx, my;
-		glfwGetMousePos(&mx, &my);
-		g->emitter.x = (double) mx;
-		g->emitter.y = (double) WINDOW_HEIGHT-my;
-	}
+	bullet *b;
+	static int mx, my;
 	
-	if (glfwGetKey(GLFW_KEY_SPACE) || glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT)) {
-		fire(g, 20, 0);
-	} else if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT)) {
-		fire(g, 20, 1);
-	}
-	if (glfwGetKey('1')) g->render_type=1;
-	if (glfwGetKey('2')) g->render_type=2;
+	glfwGetMousePos(&mx, &my);
+	g->emitter.x = (double) mx;
+	g->emitter.y = (double) WINDOW_HEIGHT - my;	
 	
+	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
+		shmup_game_fire(g, 40, 0);
+	
+	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
+		shmup_game_fire(g, 40, 1);
+	
+	if (glfwGetKey('1')) 
+		g->render_type=1;
+	
+	if (glfwGetKey('2')) 
+		g->render_type=2;
+	
+	player *p = &g->player[0];
+	if (glfwGetKey(GLFW_KEY_LEFT))
+		if (glfwGetKey(GLFW_KEY_UP))
+			p->vel = v2(-PLAYER_D_SPEED, PLAYER_D_SPEED);
+		else if (glfwGetKey(GLFW_KEY_DOWN))
+			p->vel = v2(-PLAYER_D_SPEED, -PLAYER_D_SPEED);
+		else
+			p->vel = v2(-PLAYER_SPEED, 0);
+	
+	else if (glfwGetKey(GLFW_KEY_RIGHT))
+		if (glfwGetKey(GLFW_KEY_UP))
+			p->vel = v2(PLAYER_D_SPEED, PLAYER_D_SPEED);
+		else if (glfwGetKey(GLFW_KEY_DOWN))
+			p->vel = v2(PLAYER_D_SPEED, -PLAYER_D_SPEED);
+		else
+			p->vel = v2(PLAYER_SPEED, 0);
+	
+	else
+		if (glfwGetKey(GLFW_KEY_UP))
+			p->vel = v2(0, PLAYER_SPEED);
+		else if (glfwGetKey(GLFW_KEY_DOWN))
+			p->vel = v2(0, -PLAYER_SPEED);
+		else
+			p->vel = v2zero;
+	
+	
+	player_update(&g->player[0], dt);
 	/* 
-	 * be careful with these, as this data may be moved by the bpool_resize
-	 * function!
+	 * be careful with this pointer, as this data may be moved by the 
+	 * bpool_resize function! Make sure it points to the right place.
 	 */
 	 
-	bullet *b = g->bpool->bdata;
+	b = g->bpool->bdata;
 	
-	/* Do updates */	
+	/* do updates */
 	for (int i=0; i < g->bpool->n_active; ++i) {
 		bullet_update(&b[i], dt);
 	}
@@ -180,13 +237,30 @@ shmup_game_draw(shmup_game *g)
 	glLoadIdentity();
 	
 	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);	
+	glDisable(GL_POINT_SPRITE);
+	glDisable(GL_TEXTURE_2D);
+//	glPushMatrix();
+//	glDisable(GL_BLEND);	
+	glTranslated(g->player[0].pos.x, g->player[0].pos.y, 0);	
+	glBegin(GL_QUADS);
+	{
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glVertex2d(-30, -10);
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glVertex2d(30, -10);
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glVertex2d(30, 10);
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glVertex2d(-30, 10);
+	}
+	glEnd();
+//	glPopMatrix();
+	glLoadIdentity();
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	glDisable(GL_DEPTH_TEST);
-//	glDepthFunc();
-//	glDepthMask(GL_FALSE);
-	
+
 	glPointSize(16.0f);
-	
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_TEXTURE_2D);
 		
@@ -212,9 +286,4 @@ shmup_game_draw(shmup_game *g)
 	glUseProgram(0);
 	
 	glfwSwapBuffers();
-}
-
-void shmup_game_close(shmup_game *g) {
-	bpool_destroy(g->bpool);
-	free(g);
 }

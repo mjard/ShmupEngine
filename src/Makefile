@@ -3,7 +3,7 @@ OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=shmup
 
 CC=gcc
-LIBS=-lm -lglfw
+LIBS=-lm -lglfw -lenet
 LDFLAGS=-g
 CFLAGS=-c -std=c99
 

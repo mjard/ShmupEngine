@@ -12,9 +12,11 @@ shmup_game_init()
 	shmup_game *g;
 	
 	g = malloc(sizeof(shmup_game));
+	glfwGetWindowSize(&g->window_width, &g->window_height);
+	
 	g->render_type = 2;
 	g->quit = 0;	
-	g->emitter = v2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+	g->emitter = v2(g->window_width / 2, g->window_height / 2);
 	g->gravity = v2(0, -250);	
 	g->bpool = bpool_new(2000);	
 	
@@ -46,7 +48,7 @@ shmup_game_init()
 		g->host = enet_host_create(NULL, 4, 2, 0, 0);
 	}
 	
-	g->player[0].pos = v2(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+	g->player[0].pos = v2(g->window_width/2, g->window_height/2);
 	g->player[0].vel = v2zero;
 	g->player[0].acc = v2zero;
 	
@@ -164,10 +166,9 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	
 	bullet *b;
 	static int mx, my;
-	
 	glfwGetMousePos(&mx, &my);
 	g->emitter.x = (double) mx;
-	g->emitter.y = (double) WINDOW_HEIGHT - my;	
+	g->emitter.y = (double) g->window_height-my;
 	
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
 		shmup_game_fire(g, 20, 0, v2zero, v2zero, v2zero);
@@ -197,7 +198,7 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	/* do collisions */
 	for (int i=0; i < g->bpool->n_active; ++i) {
 		
-		if (!point_vs_aabb(b[i].pos, v2zero, v2(WINDOW_WIDTH, WINDOW_HEIGHT)))
+		if (!point_vs_aabb(b[i].pos, v2zero, v2(g->window_width, g->window_height)))
 			bpool_deactivate(g->bpool, i--); 
 	}	
 }

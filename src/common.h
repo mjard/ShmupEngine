@@ -31,6 +31,8 @@ typedef struct shmup_game {
 	int quit;
 	int render_type;
 	int network_type;
+	int window_width;
+	int window_height;
 	vec2d emitter;
 	vec2d gravity;
 	player player[4];

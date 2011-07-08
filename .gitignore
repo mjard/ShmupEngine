@@ -1,4 +1,5 @@
 *.o
+*.swp
 shmup
 .DS_Store
 lib/

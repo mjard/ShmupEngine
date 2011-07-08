@@ -17,8 +17,6 @@
 #endif
 
 #define MAX_BULLETS 200000
-#define WINDOW_WIDTH 1152
-#define WINDOW_HEIGHT 720
 
 #include "common.h"
 #include "shader.h"

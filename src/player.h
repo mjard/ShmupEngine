@@ -5,11 +5,11 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#import <gl/glfw.h>
+#include <GL/glfw.h>
 
-#import "vector.h"
-#import "common.h"
-#import "game.h"
+#include "vector.h"
+#include "common.h"
+#include "game.h"
 
 #define HALFSQRT2 0.707106781186548
 #define PLAYER_ACC 3000

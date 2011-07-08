@@ -18,7 +18,7 @@ shmup_game_init()
 	g->quit = 0;	
 	g->emitter = v2(g->window_width / 2, g->window_height / 2);
 	g->gravity = v2(0, -250);	
-	g->bpool = bpool_new(2000);	
+	g->bpool = bpool_new(8000);	
 	
 	g->bpool->tex[0] = SOIL_load_OGL_texture("./data/flare.tga",
 						 SOIL_LOAD_AUTO,
@@ -130,8 +130,8 @@ shmup_game_fire(shmup_game *g, int num, int col, vec2d pos, vec2d vel, vec2d acc
 		}
 		
 		if (vel.x == 0 && vel.y == 0) {
-			speed = 200.0 + (float)rand()/RAND_MAX * 400;
-			angle = (float)rand()/RAND_MAX * M_PI * 2;
+			speed = 300; //200.0 + (float)rand()/RAND_MAX * 400;
+			angle = ((float) i / num) * (M_PI * 2); // (float)rand()/RAND_MAX * M_PI * 2;
 			bvel = v2(cos(angle)*speed, sin(angle)*speed);
 		} else {
 			bvel = vel;
@@ -171,10 +171,10 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	g->emitter.y = (double) g->window_height-my;
 	
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
-		shmup_game_fire(g, 10, 0, v2zero, v2zero, v2zero);
+		shmup_game_fire(g, 40, 0, v2zero, v2zero, v2zero);
 	
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
-		shmup_game_fire(g, 10, 1, v2zero, v2zero, v2zero);
+		shmup_game_fire(g, 40, 1, v2zero, v2zero, v2zero);
 	
 	if (glfwGetKey('1')) 
 		g->render_type=1;

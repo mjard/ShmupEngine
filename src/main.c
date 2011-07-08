@@ -16,26 +16,28 @@ main(int argc, char **argv)
 	}
 
 	glfwGetDesktopMode(&d_mode);
-	
-	if(!glfwOpenWindow(d_mode.Width, d_mode.Height, d_mode.RedBits, 
-	        d_mode.GreenBits, d_mode.BlueBits, 8, 8, 0, GLFW_FULLSCREEN)) {
+	//d_mode.Width/1.5, d_mode.Height/1.5
+	if(!glfwOpenWindow(800, 600, d_mode.RedBits, 
+	        d_mode.GreenBits, d_mode.BlueBits, 8, 8, 0, GLFW_WINDOW)) {
 		fprintf(stderr, "Failed to open GLFW window\n");
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
 
+	g = shmup_game_init();
+	
 	glfwSetWindowTitle("ShmupEngine");
 //	glfwSetWindowSizeCallback(resize);
 	glfwSwapInterval(1);
-	glfwSetMousePos(d_mode.Width/2, d_mode.Height/2);
+	glfwSetMousePos(g->window_width/2, g->window_height/2);
 	glfwEnable(GLFW_MOUSE_CURSOR);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();   
-	glOrtho(0, d_mode.Width, 0, d_mode.Height, 100, -100);
+	glOrtho(0, g->window_width, 0, g->window_height, 100, -100);
 	glMatrixMode(GL_MODELVIEW);
 	
-	g = shmup_game_init();
+	
 	
 	g->network_type = CLIENT;
 	for (int i=0; i<argc; ++i) {

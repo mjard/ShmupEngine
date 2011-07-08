@@ -12,7 +12,7 @@ shmup_game_init()
 	shmup_game *g;
 	
 	g = malloc(sizeof(shmup_game));
-	g->render_type = 1;
+	g->render_type = 2;
 	g->quit = 0;	
 	g->emitter = v2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	g->gravity = v2(0, -250);	
@@ -59,10 +59,11 @@ shmup_game_init()
 void 
 shmup_game_close(shmup_game *g) 
 {
-	bpool_destroy(g->bpool);
-	free(g);
 	enet_host_destroy(g->host);
 	enet_deinitialize();
+	bpool_destroy(g->bpool);
+	free(g);
+
 }
 
 void 
@@ -97,10 +98,10 @@ shmup_game_run(shmup_game *g)
 }
 
 void
-shmup_game_fire(shmup_game *g, int num, int col)
+shmup_game_fire(shmup_game *g, int num, int col, vec2d pos, vec2d vel, vec2d acc)
 {
 	bullet *b;
-	vec2d vel;
+	vec2d bpos, bvel;
 	unsigned int i, index;
 	double angle, speed;
 		
@@ -120,9 +121,19 @@ shmup_game_fire(shmup_game *g, int num, int col)
 		
 		b = &g->bpool->bdata[index];
 		
-		speed = 200.0 + (float)rand()/RAND_MAX * 400;
-		angle = (float)rand()/RAND_MAX * M_PI * 2;
-		vel = v2(cos(angle)*speed, sin(angle)*speed);
+		if (pos.x == 0 && pos.y == 0) {
+			bpos = g->emitter;
+		} else {
+			bpos = pos;
+		}
+		
+		if (vel.x == 0 && vel.y == 0) {
+			speed = 200.0 + (float)rand()/RAND_MAX * 400;
+			angle = (float)rand()/RAND_MAX * M_PI * 2;
+			bvel = v2(cos(angle)*speed, sin(angle)*speed);
+		} else {
+			bvel = vel;
+		}
 		
 		if (col) {
 			unsigned char colorbase;
@@ -143,7 +154,7 @@ shmup_game_fire(shmup_game *g, int num, int col)
 			b->btype = B_ACCEL;
 		}
 		
-		bullet_emit(b, g->emitter, vel, g->gravity);		
+		bullet_emit(b, bpos, bvel, acc);		
 	}
 }
 
@@ -159,44 +170,18 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	g->emitter.y = (double) WINDOW_HEIGHT - my;	
 	
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
-		shmup_game_fire(g, 40, 0);
+		shmup_game_fire(g, 20, 0, v2zero, v2zero, v2zero);
 	
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
-		shmup_game_fire(g, 40, 1);
+		shmup_game_fire(g, 20, 1, v2zero, v2zero, v2zero);
 	
 	if (glfwGetKey('1')) 
 		g->render_type=1;
 	
 	if (glfwGetKey('2')) 
 		g->render_type=2;
-	
-	player *p = &g->player[0];
-	if (glfwGetKey(GLFW_KEY_LEFT))
-		if (glfwGetKey(GLFW_KEY_UP))
-			p->vel = v2(-PLAYER_D_SPEED, PLAYER_D_SPEED);
-		else if (glfwGetKey(GLFW_KEY_DOWN))
-			p->vel = v2(-PLAYER_D_SPEED, -PLAYER_D_SPEED);
-		else
-			p->vel = v2(-PLAYER_SPEED, 0);
-	
-	else if (glfwGetKey(GLFW_KEY_RIGHT))
-		if (glfwGetKey(GLFW_KEY_UP))
-			p->vel = v2(PLAYER_D_SPEED, PLAYER_D_SPEED);
-		else if (glfwGetKey(GLFW_KEY_DOWN))
-			p->vel = v2(PLAYER_D_SPEED, -PLAYER_D_SPEED);
-		else
-			p->vel = v2(PLAYER_SPEED, 0);
-	
-	else
-		if (glfwGetKey(GLFW_KEY_UP))
-			p->vel = v2(0, PLAYER_SPEED);
-		else if (glfwGetKey(GLFW_KEY_DOWN))
-			p->vel = v2(0, -PLAYER_SPEED);
-		else
-			p->vel = v2zero;
-	
-	
-	player_update(&g->player[0], dt);
+		
+	player_update(g, &g->player[0], dt);
 	/* 
 	 * be careful with this pointer, as this data may be moved by the 
 	 * bpool_resize function! Make sure it points to the right place.
@@ -212,15 +197,8 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	/* do collisions */
 	for (int i=0; i < g->bpool->n_active; ++i) {
 		
-		if (b[i].pos.y > WINDOW_HEIGHT && b[i].vel.y > 0) {
-			b[i].vel.y *= -0.6;
-		} else if (b[i].pos.y < 0) {
-			/* deactivate and rollback i to checked the swapped element */
+		if (!point_vs_aabb(b[i].pos, v2zero, v2(WINDOW_WIDTH, WINDOW_HEIGHT)))
 			bpool_deactivate(g->bpool, i--); 
-		}		
-		if (b[i].pos.x < 0 && b[i].vel.x < 0 || b[i].pos.x > WINDOW_WIDTH && b[i].vel.x > 0) {
-			b[i].vel.x *= -0.6;
-		}		
 	}	
 }
 
@@ -260,11 +238,11 @@ shmup_game_draw(shmup_game *g)
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	glPointSize(16.0f);
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_TEXTURE_2D);
 		
-	if (g->render_type == 1) {		
+	if (g->render_type == 1) {
+		glPointSize(32.0f);
 		glBindTexture(GL_TEXTURE_2D, g->bpool->tex[0]);
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -272,6 +250,7 @@ shmup_game_draw(shmup_game *g)
 		glVertexPointer(2, GL_DOUBLE, sizeof(bullet), &b[0].pos);
 		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(bullet), &b[0].color);
 	} else {
+		glPointSize(16.0f);
 		glBindTexture(GL_TEXTURE_2D, g->bpool->tex[1]);
 		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
 		glEnableClientState(GL_VERTEX_ARRAY);

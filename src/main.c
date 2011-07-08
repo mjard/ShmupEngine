@@ -21,7 +21,7 @@ main(int argc, char **argv)
 	}
 
 	glfwSetWindowTitle("ShmupEngine");
-//	glfwSetWindowSizeCallback( resize );
+//	glfwSetWindowSizeCallback(resize);
 	glfwSwapInterval(1);
 	glfwSetMousePos(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
 	glfwEnable(GLFW_MOUSE_CURSOR);

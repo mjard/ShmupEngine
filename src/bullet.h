@@ -12,6 +12,7 @@
 #include <GL/glfw.h>
 
 #include "vector.h"
+#include "common.h"
 
 enum B_TYPE {
 	B_REG,		// pos, vel, flies in straight line
@@ -22,23 +23,6 @@ enum B_TYPE {
 	B_BEAM,		// pos, direction, fires instant ray 
 	B_LUA		// pos, vel, acc, checks with lua for instructions
 };
-
-typedef struct bullet {
-	vec2d pos;
-	vec2d vel;
-	vec2d acc;
-	unsigned int color;
-	unsigned int btype;
-	float padding[2];
-} bullet;
-
-typedef struct bpool {
-	int size;
-	int n_active;	
-	GLuint tex[2];
-	GLuint prog;
-	bullet *bdata;
-} bpool;
 
 void bullet_init(bullet *b);
 void bullet_emit(bullet *b, vec2d pos, vec2d vel, vec2d acc);

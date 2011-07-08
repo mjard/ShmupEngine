@@ -9,31 +9,31 @@ void
 player_update(shmup_game *g, player *p, float dt)
 {
 
-	if (glfwGetKey(GLFW_KEY_LEFT))
-		if (glfwGetKey(GLFW_KEY_UP))
-			p->acc = v2(-PLAYER_D_ACC, PLAYER_D_ACC);
-		else if (glfwGetKey(GLFW_KEY_DOWN))
-			p->acc = v2(-PLAYER_D_ACC, -PLAYER_D_ACC);
+	if (glfwGetKey('A'))
+		if (glfwGetKey('W'))
+			p->vel = v2(-PLAYER_D_SPEED, PLAYER_D_SPEED);
+		else if (glfwGetKey('S'))
+			p->vel = v2(-PLAYER_D_SPEED, -PLAYER_D_SPEED);
 		else
-			p->acc = v2(-PLAYER_ACC, 0);
+			p->vel = v2(-PLAYER_SPEED, 0);
 	
-		else if (glfwGetKey(GLFW_KEY_RIGHT))
-			if (glfwGetKey(GLFW_KEY_UP))
-				p->acc = v2(PLAYER_D_ACC, PLAYER_D_ACC);
-			else if (glfwGetKey(GLFW_KEY_DOWN))
-				p->acc = v2(PLAYER_D_ACC, -PLAYER_D_ACC);
-			else
-				p->acc = v2(PLAYER_ACC, 0);
-	
-			else
-				if (glfwGetKey(GLFW_KEY_UP))
-					p->acc = v2(0, PLAYER_ACC);
-				else if (glfwGetKey(GLFW_KEY_DOWN))
-					p->acc = v2(0, -PLAYER_ACC);
-				else {
-					p->acc = v2zero;
-					p->vel = v2mul(p->vel, 0.5);
-				}
+	else if (glfwGetKey('D'))
+		if (glfwGetKey('W'))
+			p->vel = v2(PLAYER_D_SPEED, PLAYER_D_SPEED);
+		else if (glfwGetKey('S'))
+			p->vel = v2(PLAYER_D_SPEED, -PLAYER_D_SPEED);
+		else
+			p->vel = v2(PLAYER_SPEED, 0);
+
+	else
+		if (glfwGetKey('W'))
+			p->vel = v2(0, PLAYER_SPEED);
+		else if (glfwGetKey('S'))
+			p->vel = v2(0, -PLAYER_SPEED);
+		else {
+			p->acc = v2zero;
+			p->vel = v2mul(p->vel, 0.8);
+		}
 	
 	if (glfwGetKey(GLFW_KEY_SPACE)) {
 		shmup_game_fire(g, 1, 1, v2add(p->pos, v2(20, -10)), 

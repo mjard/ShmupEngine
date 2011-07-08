@@ -171,10 +171,10 @@ shmup_game_update(shmup_game *g, double t, double dt)
 	g->emitter.y = (double) g->window_height-my;
 	
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
-		shmup_game_fire(g, 20, 0, v2zero, v2zero, v2zero);
+		shmup_game_fire(g, 10, 0, v2zero, v2zero, v2zero);
 	
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
-		shmup_game_fire(g, 20, 1, v2zero, v2zero, v2zero);
+		shmup_game_fire(g, 10, 1, v2zero, v2zero, v2zero);
 	
 	if (glfwGetKey('1')) 
 		g->render_type=1;
@@ -238,7 +238,8 @@ shmup_game_draw(shmup_game *g)
 	glLoadIdentity();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	glEnable(GL_POINT_SPRITE);
 	glEnable(GL_TEXTURE_2D);
 		

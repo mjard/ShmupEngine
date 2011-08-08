@@ -1,4 +1,4 @@
-GAME_SOURCE=src/
+GAME_SOURCE=src
 EXECUTABLE=shmup
 
 CC=gcc
@@ -17,7 +17,7 @@ CC=clang
 LDFLAGS += -framework OpenGL -framework Cocoa
 endif
 
-SOURCES=$(shell find $(GAME_SOURCE) -type f -name "*.c")
+SOURCES=$(wildcard $(GAME_SOURCE)/*.c)
 OBJECTS=$(SOURCES:.c=.o)
 
 .PHONY : all clean
